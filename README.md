@@ -5,15 +5,16 @@ This project contains models and some test code for reproduction of some parts o
 
 ## Methods
 This repository contains:
-1) Chainer CNN from original article [1].
-2) PyTorch CNN with the same architecture, but training code uses Cosine Annealing With Warm Restarts from article [2] to adjust 
+1) Chainer CNN (oCNN) from original article [1].
+2) PyTorch CNN (ptCNN) with the same architecture, but training code uses Cosine Annealing With Warm Restarts from article [2] to adjust 
  learning rate and achieve lower loss and higher accuracy
-3) Clustering:
-    1) Max pseudoclique clustering of CNN predictions
-    2) Spectral clustering of DAFS matrices
+3) Clustering code:
+    1) Max pseudoclique clustering of ptCNN predictions (KMeans)
+    2) Spectral clustering of DAFS scores
 4) Visualisation and analysis code
 
 ## Results
+### The horrifying code
 1) The original code from the article has a little documentation. Instructions from README
 is not effective:
     1) `dafs` can not be installed from provided source without `make clean` due to 
@@ -39,6 +40,16 @@ is not effective:
     7) On some datasets DataLoader produces empty datasets for some reason.
 2) NO DOCSTRINGS and almost no comments on the details of the script 
     (metrics unmentioned, code for comparison not provided)
+### What was done?
+1) New ConvNN (ptCNN) of the same architecture was created using PyTorch for deeper understanding
+of authors' ideas. Some new methods of training was used to reduce number of epochs before
+loss/acc convergence
+2) DataSets and other data-related code were reimplemented with reliable numpy and sklearn
+functions. On load new code provides some stats of datasets, which can be useful to assess
+splitting quality and Model as well.
+3) Clustering algorithms examined:
+    1) DAFS score --> Spectral clustering
+    2) ptCNN 
 ## References
 1) Genta Aoki, Yasubumi Sakakibara, 
 Convolutional neural networks for classification of alignments of non-coding 
