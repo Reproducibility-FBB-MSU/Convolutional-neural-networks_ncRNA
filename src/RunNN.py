@@ -98,6 +98,7 @@ def predict(model, dl):
     fp = 0
     fn = 0
     tn = 0
+    preds = []
     with torch.no_grad():
         for (alns, labels, gn1, gn2, cl1, cl2) in dl:
             alns = alns.to(model.device)
@@ -105,9 +106,10 @@ def predict(model, dl):
             outputs = model(alns)
             _, predicted = torch.max(outputs.data, 1)
             tn += torch.min(predicted, labels).sum().item()
-            fn += ((predicted == 1) == (labels == 0)).sum().item()
-            fp += ((predicted == 0) == (labels == 1)).sum().item()
-            tp += ((predicted == 0) == (labels == 0)).sum().item()
+            fn += torch.min((predicted == 1), (labels == 0)).sum().item()
+            fp += torch.min((predicted == 0), (labels == 1)).sum().item()
+            tp += torch.min((predicted == 0), (labels == 0)).sum().item()
+            preds += list(zip(gn1, gn2, cl1, cl2, predicted))
     with open("prediction_test_results.txt", "w") as fout:
         fout.write(
             """
@@ -130,7 +132,8 @@ f1-score: {}
         "ACC": (tp + tn) / (tp + tn + fp + fn),
         "PREC": tp / (tp + fp),
         "RECALL": tp / (tp + fn),
-        "F1": 2 * tp / (2 * tp + fp + fn)
+        "F1": 2 * tp / (2 * tp + fp + fn),
+        "PREDICTIONS": preds
     }
 
 

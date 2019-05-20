@@ -12,20 +12,6 @@ class TupleDataset(Dataset):
 
     def __init__(self, data_tuples):
         self.data_tuples = data_tuples
-        # extend dataset
-        extension = []
-        for data in self.data_tuples:
-            extension.append(
-                (
-                    cat((data[0][:, :, 8:], data[0][:, :, :8]), dim=2),
-                    data[1],
-                    data[3],
-                    data[2],
-                    data[5],
-                    data[4]
-                )
-            )
-        self.data_tuples += extension
 
     def __len__(self):
         return len(self.data_tuples)
@@ -50,18 +36,28 @@ class AlignmentFilePrepare(Dataset):
         :param genelabels_path: path to gene labels txt file
         """
         self.alns = np.load(data_path)[:, :max_len, :]
+        # extend dataset
+        w = self.alns.shape[2]
+        self.alns = np.append(
+            self.alns,
+            np.append(self.alns[:, :, w//2:], self.alns[:, :, :w//2], axis=2),
+            axis=0
+        )
         if structure:
             # if exception was raised, check if you passed DAFS matrices Width=16
             self.alns = self.alns[:, :, [6, 7, 8, 13, 14, 15]]
         self.labels = np.load(aln_labels_path)
+        self.labels = np.append(self.labels, self.labels)  # append labels for extension
         if len(self.alns) != len(self.labels):
             raise IndexError("Lengths of alns and labels do not match")
         with open(genelabels_path) as fin:
             self.gene_names, self.class_labels = zip(*map(lambda s: s.split(":"), fin.readlines()))
         self.class_labels = list(map(int, self.class_labels))
-        if len(self.alns) != (len(self.gene_names) ** 2 - len(self.gene_names)) // 2:
+        if len(self.alns) != len(self.gene_names) ** 2 - len(self.gene_names):
             raise IndexError("Lengths of alns and genes do not match")
         self.index_to_coords = list(combinations(range(len(self.gene_names)), 2))
+        self.index_to_coords += list(map(lambda k: (k[1], k[0]), combinations(range(len(self.gene_names)), 2)))
+        # extension complete
 
     def __len__(self):
         return len(self.alns)

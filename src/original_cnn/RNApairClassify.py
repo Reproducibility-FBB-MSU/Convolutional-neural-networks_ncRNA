@@ -138,7 +138,7 @@ class PredictingMode(LearningMode):
 
     def predictor(self):
         if self.args.validation > 0:
-            val = 0
+            val = 0  # CHANGED
 
             CV = Dataset.MakeCVDataset(self.genelabellist, self.inputfam, self.validation)
             CV.loaddataset(self.dataset, self.label)
