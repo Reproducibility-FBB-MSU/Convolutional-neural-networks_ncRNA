@@ -3,26 +3,17 @@
 import argparse
 import sys
 import subprocess
-import os.path
+import os
 
 import numpy as np
-import chainer
-from chainer import report, training, Chain, datasets, iterators, optimizers, cuda, Reporter, report_scope
-import chainer.functions as F
-import chainer.links as L
-from chainer.training import extensions
-from chainer.datasets import tuple_dataset
 
 import matplotlib.pyplot as plt
 plt.switch_backend('agg')
-import time
 import gc
 
-sys.path.append("./model")
 import DatasetMaker as Dataset
 import CNNmodel as Model
 
-from chainer import serializers
 
 class LearningMode:
     def __init__(self, args):
